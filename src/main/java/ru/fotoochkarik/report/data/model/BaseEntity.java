@@ -6,6 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
+import lombok.EqualsAndHashCode.Include;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,10 +23,12 @@ import org.hibernate.annotations.Parameter;
 @NoArgsConstructor
 @MappedSuperclass
 @AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class BaseEntity {
 
   @Id
   @GeneratedValue(generator = "UUID")
+  @Include
   @GenericGenerator(
       name = "UUID",
       strategy = "org.hibernate.id.UUIDGenerator",
@@ -36,5 +39,6 @@ public abstract class BaseEntity {
           )
       }
   )
-  private UUID id;
+  protected UUID id;
+
 }

@@ -1,12 +1,12 @@
 package ru.fotoochkarik.report.data.model;
 
-import java.time.Month;
 import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,15 +22,12 @@ import ru.fotoochkarik.report.data.enums.ExpenseType;
 @Setter
 @NoArgsConstructor
 @Table(schema = "report", name = "expense")
+@EqualsAndHashCode(callSuper = true)
 public class ExpenseEntity extends BaseEntity {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "type", nullable = false)
   private ExpenseType type;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "month", nullable = false)
-  private Month month;
 
   @Column(name = "sum")
   private Long sum;
