@@ -12,7 +12,7 @@ import ru.fotoochkarik.report.data.enums.ExpenseType;
 public class ExpenseRequest {
 
   private ExpenseType type;
-  private Long sum;
+  private Double sum;
   private ZonedDateTime payDate;
 
 }

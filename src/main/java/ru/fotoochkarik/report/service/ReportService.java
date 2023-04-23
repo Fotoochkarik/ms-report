@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -70,17 +71,17 @@ public class ReportService {
     var type = expenseRequest.getType();
     int month = expenseRequest.getPayDate().getMonth().getValue();
     int year = expenseRequest.getPayDate().getYear();
+    var requestSum = nonNull(expenseRequest.getSum()) ? expenseRequest.getSum() : 0;
     var expenseOptional = expenseRepository.findByTypeAndMonthAndYear(type, month, year);
     ExpenseEntity expense;
     if (expenseOptional.isPresent()) {
-      var sum = expenseOptional.get().getSum();
       expense = expenseOptional.get();
-      expense.setSum(nonNull(sum) ? sum + expenseRequest.getSum() : expenseRequest.getSum());
-
+      var sum = nonNull(expense.getSum()) ? expense.getSum() : 0;
+      expense.setSum(sum + requestSum);
     } else {
       expense = new ExpenseEntity();
       expense.setType(expenseRequest.getType());
-      expense.setSum(expenseRequest.getSum());
+      expense.setSum(requestSum);
     }
     expense.setEffectiveDate(expenseRequest.getPayDate());
     var saved = expenseRepository.save(expense);
@@ -103,20 +104,36 @@ public class ReportService {
   }
 
   public void createReportYear(List<ExpenseEntity> expenseList) throws IOException {
+    var workbook = getWorkbook(expenseList);
+    writeFile(workbook);
+    workbook.close();
+  }
+
+  public void downloadReport(Integer year, HttpServletResponse response) throws IOException {
+    var expenseList = expenseRepository.findAllByYear(year);
+    getReportYear(expenseList, response);
+  }
+
+  private void getReportYear(List<ExpenseEntity> expenseList, HttpServletResponse response) throws IOException {
+    var workbook = getWorkbook(expenseList);
+    var responseOutputStream = response.getOutputStream();
+    workbook.write(responseOutputStream);
+    workbook.close();
+  }
+
+  private XSSFWorkbook getWorkbook(List<ExpenseEntity> expenseList) {
     var workbook = new XSSFWorkbook();
     var reportSheet = workbook.createSheet("Report");
     var chart = addChart(reportSheet);
     var scaleX = createScaleX(reportSheet);
     var data = getLineChartData(chart);
-
     var rowIndex = new AtomicInteger(0);
     createHeaderTable(workbook, reportSheet.createRow(rowIndex.getAndIncrement()));
     createCountingRow(workbook, reportSheet, rowIndex, scaleX, data);
     fillTable(workbook, reportSheet, scaleX, data, rowIndex, expenseList);
     addSizeColumn(reportSheet);
     chart.plot(data);
-    writeFile(workbook);
-    workbook.close();
+    return workbook;
   }
 
   private XDDFLineChartData getLineChartData(XSSFChart chart) {

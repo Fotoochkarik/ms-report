@@ -13,7 +13,7 @@ import ru.fotoochkarik.report.data.enums.ExpenseType;
 public class ExpenseResponse {
 
   private ExpenseType type;
-  private Long totalSum;
+  private Double totalSum;
   private Month month;
   private Integer year;
 

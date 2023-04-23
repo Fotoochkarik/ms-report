@@ -2,9 +2,12 @@ package ru.fotoochkarik.report.controller;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +21,7 @@ import ru.fotoochkarik.report.service.ReportService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1")
+@RequestMapping("/api/v1")
 public class ReportRestController {
 
   private final ReportService reportService;
@@ -39,6 +42,13 @@ public class ReportRestController {
       @RequestParam("endDate") @DateTimeFormat(iso = ISO.DATE_TIME) ZonedDateTime endDate) throws IOException {
     reportService.createReportPeriod(startDate, endDate);
     return ResponseEntity.ok().build();
+  }
+
+  @GetMapping(value = "/download-report")
+  public void downloadReport(@RequestParam("year") Integer year, HttpServletResponse response) throws IOException {
+    response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
+    response.setHeader(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment;filename=ReportExcel-%s.xlsx", year));
+    reportService.downloadReport(year, response);
   }
 
 }

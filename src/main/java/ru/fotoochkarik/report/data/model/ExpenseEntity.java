@@ -30,7 +30,7 @@ public class ExpenseEntity extends BaseEntity {
   private ExpenseType type;
 
   @Column(name = "sum")
-  private Long sum;
+  private Double sum;
 
   @Column(name = "effective_date")
   private ZonedDateTime effectiveDate;
