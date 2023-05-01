@@ -1,7 +1,7 @@
 package ru.fotoochkarik.report.controller;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
+import java.time.LocalDate;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -38,8 +38,8 @@ public class ReportRestController {
   }
 
   @GetMapping("/period")
-  public ResponseEntity<Void> getReportPeriod(@RequestParam("startDate") @DateTimeFormat(iso = ISO.DATE_TIME) ZonedDateTime startDate,
-      @RequestParam("endDate") @DateTimeFormat(iso = ISO.DATE_TIME) ZonedDateTime endDate) throws IOException {
+  public ResponseEntity<Void> getReportPeriod(@RequestParam("startDate") @DateTimeFormat(iso = ISO.DATE) LocalDate startDate,
+      @RequestParam("endDate") @DateTimeFormat(iso = ISO.DATE) LocalDate endDate) throws IOException {
     reportService.createReportPeriod(startDate, endDate);
     return ResponseEntity.ok().build();
   }

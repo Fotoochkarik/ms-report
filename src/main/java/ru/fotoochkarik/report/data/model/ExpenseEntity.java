@@ -1,5 +1,6 @@
 package ru.fotoochkarik.report.data.model;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,6 +32,9 @@ public class ExpenseEntity extends BaseEntity {
 
   @Column(name = "sum")
   private Double sum;
+
+  @Column(name = "pay_date")
+  private LocalDate payDate;
 
   @Column(name = "effective_date")
   private ZonedDateTime effectiveDate;

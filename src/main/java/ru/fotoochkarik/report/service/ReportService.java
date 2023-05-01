@@ -5,6 +5,7 @@ import static org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZonedDateTime;
 import java.util.EnumSet;
@@ -14,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
@@ -52,6 +54,7 @@ import ru.fotoochkarik.report.data.repository.ExpenseRepository;
  * @version 1.0
  * @since 1.0.0
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -68,6 +71,7 @@ public class ReportService {
 
   @Transactional
   public ExpenseResponse add(ExpenseRequest expenseRequest) {
+    log.info("add request = {}", expenseRequest);
     var type = expenseRequest.getType();
     int month = expenseRequest.getPayDate().getMonth().getValue();
     int year = expenseRequest.getPayDate().getYear();
@@ -83,18 +87,20 @@ public class ReportService {
       expense.setType(expenseRequest.getType());
       expense.setSum(requestSum);
     }
-    expense.setEffectiveDate(expenseRequest.getPayDate());
+    expense.setPayDate(expenseRequest.getPayDate());
+    expense.setEffectiveDate(ZonedDateTime.now());
     var saved = expenseRepository.save(expense);
     return ExpenseResponse.builder()
         .type(saved.getType())
-        .month(saved.getEffectiveDate().getMonth())
+        .month(saved.getPayDate().getMonth())
+        .sum(requestSum)
         .totalSum(saved.getSum())
-        .year(saved.getEffectiveDate().getYear())
+        .year(saved.getPayDate().getYear())
         .build();
   }
 
-  public void createReportPeriod(ZonedDateTime startDate, ZonedDateTime endDate) throws IOException {
-    var expenseList = expenseRepository.findByEffectiveDateBetween(startDate, endDate);
+  public void createReportPeriod(LocalDate startDate, LocalDate endDate) throws IOException {
+    var expenseList = expenseRepository.findByPayDateBetween(startDate, endDate);
     createReportYear(expenseList);
   }
 
@@ -180,7 +186,7 @@ public class ReportService {
           cell.setCellStyle(cellStyle);
           cell.setCellValue(String.valueOf(key));
           listEntryValue.forEach(expense -> {
-            var rowCell = dataRow.createCell(expense.getEffectiveDate().getMonth().getValue());
+            var rowCell = dataRow.createCell(expense.getPayDate().getMonth().getValue());
             rowCell.setCellValue(expense.getSum());
             rowCell.setCellStyle(cellStyle);
           });
