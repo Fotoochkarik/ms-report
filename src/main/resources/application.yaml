@@ -1,12 +1,22 @@
+server:
+  port: 9080
+
 spring:
   jackson:
     default-property-inclusion: non_null
   datasource:
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:5432/${app.db.name}
-    username: ${app.db.username}
-    password: ${app.db.password}
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5432}/report
+    username: ${DATASOURCE_USER:user}
+    password: ${DATASOURCE_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: org.hibernate.dialect.PostgreSQL94Dialect
+
   liquibase:
     enabled: true
     change-log: 'classpath:db/changelog/db.changelog-master.yaml'
-    default-schema: ${app.db.name-shema}
-    liquibase-schema: ${app.db.name-shema}
+    default-schema: report
+    liquibase-schema: report
