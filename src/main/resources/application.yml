@@ -1,0 +1,11 @@
+spring:
+  profiles:
+    active: dev
+  cloud:
+    config:
+      enabled: true
+      profile: dev
+  application:
+    name: ms-report
+  config:
+    import: optional:configserver:${SPRING_CONFIG_IMPORT:http://localhost:8071/}
